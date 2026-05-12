@@ -14,9 +14,9 @@
       background: #050505;
       color: #e0e0e0;
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      overflow-x: auto;  /* allow horizontal scroll if needed, but layout stays centered */
+      overflow-x: hidden;
     }
-    /* Grid background */
+    /* Grid & orb backgrounds */
     .bg-grid {
       position: fixed;
       top: 0;
@@ -42,33 +42,37 @@
       pointer-events: none;
       z-index: 0;
     }
-    /* Floating cards – smaller, positioned to avoid overlap, allow horizontal scroll if needed */
-    .floating-cards {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: auto;   /* allow scroll if cards exceed viewport */
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      padding: 0 20px;
-      gap: 20px;
+    /* Floating cards container – horizontal scroll, no overlap */
+    .floating-cards-container {
+      background: transparent;
+      padding: 40px 24px 60px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+    .floating-cards-wrapper {
+      display: inline-flex;
+      gap: 24px;
+      white-space: normal;
     }
     .code-card {
+      display: inline-block;
+      width: 240px;
       background: rgba(18,18,18,0.95);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
-      padding: 10px 14px;
-      max-width: 200px;
+      padding: 12px 16px;
       backdrop-filter: blur(20px);
       box-shadow: 0 24px 48px rgba(0,0,0,0.6);
       transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      white-space: normal;
+      vertical-align: top;
       animation: float 4s ease-in-out infinite alternate;
-      flex-shrink: 0;   /* prevent wrapping, enable horizontal scroll */
     }
     @keyframes float {
-      0% { transform: translateY(0px) rotate(0deg); }
-      100% { transform: translateY(-12px) rotate(1deg); }
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-8px); }
     }
     @keyframes orbPulse {
       0%,100% { opacity: 0.7; }
@@ -95,6 +99,7 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+    /* Buttons */
     .cta-btn {
       display: inline-flex;
       align-items: center;
@@ -136,38 +141,29 @@
       background: rgba(255,255,255,0.05);
       transform: translateY(-2px);
     }
-    /* Mobile adjustments */
+    /* Responsive */
     @media (max-width: 768px) {
-      .floating-cards {
-        position: relative;
-        margin-top: -40px;
-        margin-bottom: 40px;
-        overflow-x: auto;
-        padding-bottom: 12px;
-      }
-      .code-card {
-        max-width: 180px;
-        padding: 8px 12px;
-      }
       .nav-links { display: none; }
       .nav-actions { gap: 8px; }
-      .cta-btn, .cta-btn-ghost { padding: 10px 18px; font-size: 11px; }
+      .cta-btn, .cta-btn-ghost { padding: 10px 18px; font-size: 10px; }
       h1 { font-size: 40px; letter-spacing: -1px; }
       .hero-subhead { font-size: 16px; padding: 0 20px; }
       .nav { padding: 16px 20px; }
+      .code-card { width: 200px; padding: 10px 12px; }
+      .floating-cards-container { padding: 30px 20px 40px; }
     }
-    /* Three steps layout – preserve exact style, only ensure centering */
+    /* Steps layout */
     .steps-container {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 32px;
+      gap: 24px;
       max-width: 1000px;
       margin: 0 auto;
     }
     .step-card {
       flex: 1;
-      min-width: 200px;
+      min-width: 220px;
       background: rgba(255,255,255,0.02);
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 24px;
@@ -183,7 +179,7 @@
       color: transparent;
       margin-bottom: 16px;
     }
-    /* Pricing grid – allow horizontal scroll if needed */
+    /* Pricing grid – scrollable horizontally if needed */
     .pricing-grid {
       display: flex;
       flex-wrap: wrap;
@@ -230,6 +226,25 @@
         min-width: 260px;
       }
     }
+    /* Live example section */
+    .live-example {
+      background: rgba(0,0,0,0.3);
+      border-radius: 24px;
+      padding: 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .code-diff {
+      background: #0c0c0c;
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -258,8 +273,8 @@
   </div>
 </nav>
 
-<!-- Hero section -->
-<section style="position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:120px 24px 80px; text-align:center;">
+<!-- Hero section (no floating cards inside) -->
+<section style="position:relative; z-index:1; min-height:80vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:100px 24px 60px; text-align:center;">
   <div style="margin-bottom:20px;">
     <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:50px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);">
       <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
@@ -300,9 +315,11 @@
     <span style="color:#222;">·</span>
     <span>Works with any language</span>
   </div>
+</section>
 
-  <!-- Floating cards – smaller, scrollable if needed -->
-  <div class="floating-cards">
+<!-- Floating cards as separate horizontal scroll strip -->
+<div class="floating-cards-container">
+  <div class="floating-cards-wrapper">
     <div class="code-card">
       <div style="font-size:9px; color:#ef4444; font-family:monospace; margin-bottom:6px;">VILE ANALYSIS · HIGH RISK</div>
       <pre style="font-size:10px; color:#ccc; font-family:monospace; margin:0; line-height:1.5; white-space:pre-wrap;">authentication.js
@@ -326,10 +343,38 @@
 ⚠ Amount not sanitized
 ⚠ Missing error handler</pre>
     </div>
+    <div class="code-card">
+      <div style="font-size:9px; color:#3b82f6; font-family:monospace; margin-bottom:6px;">VILE ANALYSIS · IMPACT</div>
+      <pre style="font-size:10px; color:#ccc; font-family:monospace; margin:0; line-height:1.5;">useAuth.ts
+
+→ Affects 3 files
+→ Breaks session cookie
+→ 2 failing tests</pre>
+    </div>
+  </div>
+</div>
+
+<!-- Live example section (from original design) -->
+<section id="live-example" style="padding:40px 24px; max-width:1000px; margin:0 auto;">
+  <h2 style="text-align:center; font-size:28px; margin-bottom:24px;"><span class="grad-text">See it in action</span></h2>
+  <div class="live-example">
+    <div style="font-size:14px; margin-bottom:8px;">Try this buggy code:</div>
+    <div class="code-diff">
+      function getUserAge(user) {<br>
+      &nbsp;&nbsp;return user.age.toFixed();<br>
+      }<br>
+      console.log(getUserAge(null));
+    </div>
+    <div style="margin-top:16px; text-align:center;">
+      <a href="/signup" class="cta-btn" style="padding:10px 20px; font-size:11px;">📋 Analyze this now →</a>
+    </div>
+    <div style="margin-top:12px; font-size:12px; color:#888; text-align:center;">
+      Vile would tell you: <span style="color:#ef4444;">High risk</span> – <code>user</code> is null → TypeError. Add a null check.
+    </div>
   </div>
 </section>
 
-<!-- 3 Steps: Deploy with confidence (preserve exact layout, only centering) -->
+<!-- 3 Steps: Deploy with confidence -->
 <section id="how-it-works" style="padding:80px 24px; max-width:1200px; margin:0 auto;">
   <h2 style="text-align:center; font-size:36px; margin-bottom:60px;"><span class="grad-text">Deploy with confidence</span></h2>
   <div class="steps-container">
@@ -351,7 +396,7 @@
   </div>
 </section>
 
-<!-- Pricing section with Free, Starter, Pro, Elite (scrollable if needed) -->
+<!-- Pricing -->
 <section id="pricing" style="padding:80px 24px; max-width:1200px; margin:0 auto;">
   <h2 style="text-align:center; font-size:36px; margin-bottom:20px;"><span class="grad-text">Simple, transparent pricing</span></h2>
   <p style="text-align:center; color:#888; margin-bottom:48px;">Start free. Upgrade when you're ready.</p>
@@ -412,11 +457,20 @@
   </div>
 </section>
 
-<footer style="padding:48px 24px; border-top:1px solid rgba(255,255,255,0.05); text-align:center; color:#666; font-size:12px;">
+<!-- Stop guessing, start knowing CTA section -->
+<section style="padding:80px 24px; text-align:center; background: rgba(0,0,0,0.4); border-top:1px solid rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.05);">
+  <div style="max-width:700px; margin:0 auto;">
+    <h2 style="font-size:clamp(32px,6vw,48px); margin-bottom:24px;"><span class="grad-text">Stop guessing.</span> <span style="color:#fff;">Start knowing.</span></h2>
+    <p style="color:#888; margin-bottom:32px;">Stop wondering if your change will break production. Vile tells you before you deploy.</p>
+    <a href="/signup" class="cta-btn" style="background:#fff; color:#000; font-size:14px; padding:14px 32px;">Get started free →</a>
+  </div>
+</section>
+
+<footer style="padding:48px 24px; text-align:center; color:#666; font-size:12px;">
   © 2026 Vile – AI code safety engine
 </footer>
 
-<!-- Typewriter effect script -->
+<!-- Typewriter script -->
 <script>
   const words = [
     "how to fix it.",
@@ -443,7 +497,7 @@
       } else {
         targetEl.textContent = currentWord.slice(0, char + 1);
         char++;
-        if (char === currentWord.length) {
+        if (char === currecurrentWord.length) {
           isDeleting = true;
           setTimeout(type, 2000);
           return;
@@ -455,4 +509,5 @@
   }
 </script>
 </body>
-        </html>
+</html>
+```
